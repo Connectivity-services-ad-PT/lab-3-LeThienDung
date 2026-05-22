@@ -38,6 +38,14 @@ paths:
                     status: ok
                     service: iot-ingestion
                     version: 0.3.0
+    head:
+      tags: 
+        - System
+      summary: Cho phep GitHub ping server
+      operationId: pingHealthCheck
+      responses:
+        '200':
+          description: OK
 
   /readings:
     post:

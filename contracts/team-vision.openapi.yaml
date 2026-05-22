@@ -29,6 +29,14 @@ paths:
       responses:
         '200':
           description: OK
+    head:
+      tags: 
+        - System
+      summary: Cho phep GitHub ping server
+      operationId: pingHealthCheck
+      responses:
+        '200':
+          description: OK
   /api/v1/health:
     get:
       summary: Kiểm tra trạng thái dịch vụ AI Vision
