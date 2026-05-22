@@ -25,6 +25,7 @@ paths:
       tags:
         - System
       summary: Health check cho team-vision
+      security: []
       operationId: checkTeamVisionHealth
       responses:
         '200':
@@ -33,6 +34,7 @@ paths:
       tags: 
         - System
       summary: Cho phep GitHub ping server
+      security: []
       operationId: pingHealthCheck
       responses:
         '200':

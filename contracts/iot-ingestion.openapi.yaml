@@ -42,6 +42,7 @@ paths:
       tags: 
         - System
       summary: Cho phep GitHub ping server
+      security: []
       operationId: pingHealthCheck
       responses:
         '200':
