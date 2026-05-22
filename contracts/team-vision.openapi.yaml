@@ -21,11 +21,15 @@ tags:
 
 paths:
   /health:
-      get:
-        summary: Health Check endpoint cho GitHub Actions
-        responses:
-          '200':
-            description: Server OK
+    get:
+      tags:
+        - System
+      summary: Health Check endpoint cho GitHub Actions
+      description: Kiểm tra tình trạng hoạt động của Mock Server
+      operationId: checkServerHealth
+      responses:
+        '200':
+          description: Server OK
   /api/v1/health:
     get:
       summary: Kiểm tra trạng thái dịch vụ AI Vision
