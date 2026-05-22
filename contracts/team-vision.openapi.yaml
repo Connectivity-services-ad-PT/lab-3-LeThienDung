@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: AI Vision Service API
+  version: 1.0.0
+  description: |
+    API Contract cho dịch vụ AI Vision. 
+    Nhận frame ảnh từ Camera Stream khi phát hiện chuyển động để phân tích (nhận diện khuôn mặt, biển số xe, v.v.).
+  contact:
+    name: Le Thien Dung
+    email: dunglt@example.com
+servers:
+  - url: http://localhost:4010
+    description: Prism Mock Server (Môi trường test cục bộ)
+tags:
+  - name: Health
+    description: Các API kiểm tra trạng thái hệ thống
+  - name: Analysis
+    description: Các API xử lý phân tích hình ảnh AI
+  - name: Configuration
+    description: Các API quản lý cấu hình AI cho Camera
+
+paths:
+  /api/v1/health:
+    get:
+      summary: Kiểm tra trạng thái dịch vụ AI Vision
+      description: Trả về trạng thái hoạt động hiện tại của hệ thống AI Vision để đảm bảo dịch vụ sẵn sàng.
+      operationId: checkHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Dịch vụ hoạt động bình thường
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+
+  /api/v1/frames/analyze:
+    post:
+      summary: Gửi frame hình ảnh để AI phân tích
+      description: Nhận hình ảnh dạng chuỗi Base64 cùng metadata từ camera để phân tích vật thể (người hoặc phương tiện).
+      operationId: analyzeFrame
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FrameUploadRequest'
+      responses:
+        '200':
+          description: Phân tích thành công, trả về kết quả nhận diện
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+        '400':
+          description: Dữ liệu gửi lên không hợp lệ (Bad Request)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Lỗi máy chủ AI (Internal Server Error)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/cameras/{cameraId}/ai-config:
+    get:
+      summary: Lấy cấu hình độ nhạy AI của một camera cụ thể
+      description: Truy xuất các thông số cấu hình độ nhạy di chuyển và các model AI đang chạy trên camera đó.
+      operationId: getCameraAiConfig
+      tags:
+        - Configuration
+      parameters:
+        - name: cameraId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "CAM-GATE-01"
+      responses:
+        '200':
+          description: Trả về cấu hình hiện tại
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CameraAiConfig'
+    put:
+      summary: Cập nhật cấu hình độ nhạy AI cho camera
+      description: Cập nhật thay đổi về độ nhạy phát hiện chuyển động hoặc bật/tắt các model AI phân tích.
+      operationId: updateCameraAiConfig
+      tags:
+        - Configuration
+      parameters:
+        - name: cameraId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CameraAiConfig'
+      responses:
+        '204':
+          description: Cập nhật thành công (No Content)
+
+components:
+  schemas:
+    # 1. Định nghĩa chuẩn Problem Details (RFC 7807) cho response báo lỗi
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://example.com/probs/bad-request"
+        title:
+          type: string
+          example: "Lỗi dữ liệu đầu vào."
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Trường imageBase64 không được để trống."
+        instance:
+          type: string
+          format: uri
+          example: "https://example.com/instances/analyze"
+
+    # 2. Schema cho Request gửi frame
+    FrameUploadRequest:
+      type: object
+      required:
+        - cameraId
+        - timestamp
+        - imageBase64
+      properties:
+        cameraId:
+          type: string
+          example: "CAM-01"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-19T14:30:00Z"
+        imageBase64:
+          type: string
+          description: Chuỗi base64 của khung hình
+        note:
+          type: ["string", "null"]
+
+    # 3. Schema cho Response phân tích
+    AnalysisResponse:
+      type: object
+      properties:
+        analysisId:
+          type: string
+          example: "ANL-998877"
+        objectsDetected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedObject'
+
+    # 4. YÊU CẦU: Dùng oneOf + discriminator để phân loại kết quả nhận diện
+    DetectedObject:
+      type: object
+      required:
+        - objectType
+      properties:
+        objectType:
+          type: string
+      discriminator:
+        propertyName: objectType
+        mapping:
+          person: '#/components/schemas/PersonDetection'
+          vehicle: '#/components/schemas/VehicleDetection'
+          
+    PersonDetection:
+      allOf:
+        - $ref: '#/components/schemas/DetectedObject'
+        - type: object
+          properties:
+            faceId:
+              type: ["string", "null"]
+            confidence:
+              type: number
+              example: 0.95
+
+    VehicleDetection:
+      allOf:
+        - $ref: '#/components/schemas/DetectedObject'
+        - type: object
+          properties:
+            licensePlate:
+              type: ["string", "null"]
+            vehicleType:
+              type: string
+              example: "Car"
+
+    CameraAiConfig:
+      type: object
+      properties:
+        motionSensitivity:
+          type: integer
+          example: 80
+        enabledModels:
+          type: array
+          items:
+            type: string
+          example: ["person", "vehicle"]
