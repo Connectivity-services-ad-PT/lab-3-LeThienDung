@@ -24,12 +24,11 @@ paths:
     get:
       tags:
         - System
-      summary: Health Check endpoint cho GitHub Actions
-      description: Kiểm tra tình trạng hoạt động của Mock Server
-      operationId: checkServerHealth
+      summary: Health check cho team-vision
+      operationId: checkTeamVisionHealth
       responses:
         '200':
-          description: Server OK
+          description: OK
   /api/v1/health:
     get:
       summary: Kiểm tra trạng thái dịch vụ AI Vision
