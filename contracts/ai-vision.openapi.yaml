@@ -17,16 +17,6 @@ security:
   - bearerAuth: []
 paths:
   /health:
-      get:
-        tags:
-          - System
-        summary: Health Check endpoint cho GitHub Actions
-        description: Kiểm tra tình trạng hoạt động của Mock Server
-        operationId: checkServerHealth
-        responses:
-          '200':
-            description: Server OK
-  /health:
     get:
       tags: [system]
       operationId: getVisionHealth
