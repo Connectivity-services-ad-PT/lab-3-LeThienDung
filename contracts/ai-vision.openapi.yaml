@@ -36,6 +36,14 @@ paths:
                     status: ok
                     service: ai-vision
                     version: 0.3.0
+    head:
+      tags: [system]
+      summary: Cho phep GitHub ping server
+      security: []
+      operationId: pingVisionHealthCheck
+      responses:
+        '200':
+          description: OK
 
   /detect:
     post:
