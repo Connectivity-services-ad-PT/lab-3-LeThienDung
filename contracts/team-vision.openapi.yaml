@@ -20,6 +20,12 @@ tags:
     description: Các API quản lý cấu hình AI cho Camera
 
 paths:
+  /health:
+      get:
+        summary: Health Check endpoint cho GitHub Actions
+        responses:
+          '200':
+            description: Server OK
   /api/v1/health:
     get:
       summary: Kiểm tra trạng thái dịch vụ AI Vision
